@@ -1,6 +1,6 @@
 import json
 
-class utils:
+class UtilProvider:
     def count_lines(self, code_blob: str) -> int:
         # Count the number of lines in a string
         return len(code_blob.splitlines())
@@ -20,3 +20,7 @@ class utils:
     def jaccard_index(self, set1: set, set2: set) -> float:
         # Calculate the Jaccard index of two sets
         return len(set1.intersection(set2)) / len(set1.union(set2))
+    
+    def parameter_list_cleanup(self, parameter_list: list) -> list:
+        # Clean up the parameter list by stripping and removing type definitions
+        return [parameter.strip().split(':')[0] for parameter in parameter_list]
