@@ -24,3 +24,7 @@ class UtilProvider:
     def parameter_list_cleanup(self, parameter_list: list) -> list:
         # Clean up the parameter list by stripping and removing type definitions
         return [parameter.strip().split(':')[0] for parameter in parameter_list]
+    
+    def remove_empty_strings_from_list(self, string_list: list) -> list:
+        # Remove empty strings from a list of strings
+        return list(filter(None, string_list))
