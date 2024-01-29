@@ -2,14 +2,17 @@ from UtilProvider import UtilProvider
 
 class KaunPaada:
     def __init__(self):
-        self.codestring = "def long_parameter_list_detector(self, function_definition: str) -> bool:"
+        self.codestring = "def long_parameter_list_detector(self, function_definition: str) -> bool:\n\nasd\nline"
         self.utils = UtilProvider()
-        self.long_parameter_list_detector(self.codestring)
+        print(self.long_method_detector(self.codestring))
+        print(self.long_parameter_list_detector(self.codestring))
 
-    def long_method_detector(self, code_blob: str) -> bool:
+    def long_method_detector(self, function_code_blob: str) -> bool:
         # Detect long methods
-        num_of_lines: int = utils.count_lines(code_blob)
-        print(f"Number of lines: {num_of_lines}")
+        split_lines = self.utils.remove_empty_strings_from_list(function_code_blob.strip().splitlines())
+        print(f"Split lines: {split_lines}")
+        num_of_lines: int = len(split_lines)
+        print(f"Number of lines in the code blob: {num_of_lines}")
         return num_of_lines > 15
     
     def long_parameter_list_detector(self, function_definition: str) -> bool:
@@ -22,5 +25,4 @@ class KaunPaada:
 
 
 if __name__ == "__main__":
-    print("Hello World!")
     kaun_paada = KaunPaada()
