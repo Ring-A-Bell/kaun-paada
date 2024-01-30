@@ -1,4 +1,5 @@
 import json
+import re
 
 class UtilProvider:
     def count_lines(self, code_blob: str) -> int:
@@ -28,3 +29,27 @@ class UtilProvider:
     def remove_empty_strings_from_list(self, string_list: list) -> list:
         # Remove empty strings from a list of strings
         return list(filter(None, string_list))
+    
+    def is_empty_string(self, string: str) -> bool:
+        # Check if a string has no whitespace characters
+        return not string.strip()
+    
+    def is_import_line(self, line: str) -> bool:
+        # Check if a line is an import line
+        return line.startswith("import") or line.startswith("from")
+    
+    def is_function_definition_line(self, line: str) -> bool:
+        # Check if a line is a function definition line
+        return line.startswith("def")
+    
+    def is_class_definition_line(self, line: str) -> bool:
+        # Check if a line is a class definition line
+        return line.startswith("class")
+    
+    def is_module_or_script_line(self, line: str) -> bool:
+        # Check if a line is a module or script line
+        pattern = re.compile('^if __[a-zA-Z]+__ ==')
+        print(pattern.match(line))
+        if pattern.match(line):
+            return True
+        return False
