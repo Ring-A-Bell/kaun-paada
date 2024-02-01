@@ -6,6 +6,7 @@ LONG_PARAMETER_LIST_THRESHOLD: int = 3
 JACCARD_SIMILARITY_THRESHOLD: float = 0.75
 LINE_BREAK_PRINT: str = "#" + "-"*50 + "#"
 
+
 class KaunPaada:
     def __init__(self, file_path: str):
         print(f"File path: {file_path}")
@@ -20,12 +21,12 @@ class KaunPaada:
         self.long_parameter_list_functions: list = []
 
         self.function_detector()
-        #self.pretty_print(self.imports_list)
-        #self.pretty_print(self.global_consts_list)
-        #self.pretty_print(self.class_definitions_list)
+        # self.pretty_print(self.imports_list)
+        # self.pretty_print(self.global_consts_list)
+        # self.pretty_print(self.class_definitions_list)
         self.duplicate_code_detector()
         self.pretty_print(self.functions_list)
-        #self.refactor_file("refactored_file.py")
+        # self.refactor_file("refactored_file.py")
 
     @staticmethod
     def pretty_print(list_name: list) -> None:
@@ -58,7 +59,7 @@ class KaunPaada:
                 self.global_consts_list.append(line)
 
     # Might have to refactor this, since it's >15 lines currently
-    def function_detector(self) -> list:
+    def function_detector(self) -> None:
         new_function_flag: bool = False
         current_function: list = []
         for line in self.original_code_lines:
@@ -81,7 +82,7 @@ class KaunPaada:
                 if current_function:
                     current_function.append(line)
         if current_function not in self.functions_list:
-                self.functions_list.append(current_function)
+            self.functions_list.append(current_function)
 
     def long_method_detector(self) -> list:
         # Detect long methods
@@ -129,7 +130,8 @@ class KaunPaada:
         self.functions_list = [function for function in self.functions_list if function not in function_list_copy]
 
     def refactor_file(self, filepath: str) -> None:
-        self.fh.refactor_file(self.imports_list, self.global_consts_list, self.class_definitions_list, self.functions_list)
+        self.fh.refactor_file(self.imports_list, self.global_consts_list, self.class_definitions_list,
+                              self.functions_list)
         self.fh.save_file(filepath)
 
 

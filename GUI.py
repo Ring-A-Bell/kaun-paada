@@ -2,13 +2,15 @@ import tkinter as tk
 from tkinter import filedialog
 from main import KaunPaada
 
+
 class FilePickerGUI:
     def __init__(self):
         self.window = tk.Tk()
         self.kaun_paada = None
         self.window.title('File Picker')
         self.window.geometry('500x200')  # Set window size
-        self.label = tk.Label(self.window, text='Welcome to Kaun Paada aka Who Farted?\nThis is a code smell detection tool')
+        self.label = tk.Label(self.window, text='Welcome to Kaun Paada aka Who Farted?\nThis is a code smell '
+                                                'detection tool')
         self.label.pack()
         self.button = tk.Button(self.window, text='Select File', command=self.select_file)
         self.button.pack()
@@ -39,6 +41,7 @@ class FilePickerGUI:
 
     def run(self):
         self.window.mainloop()
+
 
 if __name__ == "__main__":
     gui = FilePickerGUI()
