@@ -13,24 +13,23 @@ class FileHandler:
     def get_file_content_lines(self) -> list:
         return self.file_content_lines
 
-    def read_file(self) -> str:
+    def read_file(self) -> None:
         with open(self.input_file_path, 'r') as file:
             self.file_content = file.read()
             self.file_content_lines = self.file_content.splitlines()
 
-    def refactor_file(self, imports: list, globals: list, classes: list, functions: list) -> None:
+    def refactor_file(self, imports_list: list, globals_list: list, classes_list: list, functions_list: list) -> None:
         # Add each line from the parameters into the refactored_file_content
-        self.refactored_file_content += '\n'.join(map(str, imports)) + '\n'
-        self.refactored_file_content += '\n'.join(map(str, globals)) + '\n'
-        self.refactored_file_content += '\n'.join(map(str, classes)) + '\n'
-        self.refactored_file_content += '\n'.join('\n'.join(map(str, function)) for function in functions) + '\n'
+        self.refactored_file_content += '\n'.join(map(str, imports_list)) + '\n'
+        self.refactored_file_content += '\n'.join(map(str, globals_list)) + '\n'
+        self.refactored_file_content += '\n'.join(map(str, classes_list)) + '\n'
+        self.refactored_file_content += '\n'.join('\n'.join(map(str, function)) for function in functions_list) + '\n'
 
-    def save_file(self, file_path: str) -> None:
-        with open(file_path, 'w') as file:
+    def save_file(self, new_file_path_name: str) -> None:
+        with open(new_file_path_name, 'w') as file:
             file.write(self.refactored_file_content)
 
 
 if __name__ == "__main__":
-    file_path = "UtilProvider.py"
-    file_handler = FileHandler(file_path)
+    file_handler = FileHandler("test_file.py")
     file_handler.read_file()
