@@ -5,6 +5,7 @@ from main import KaunPaada
 class FilePickerGUI:
     def __init__(self):
         self.window = tk.Tk()
+        self.kaun_paada = None
         self.window.title('File Picker')
         self.window.geometry('500x200')  # Set window size
         self.label = tk.Label(self.window, text='Welcome to Kaun Paada aka Who Farted?\nThis is a code smell detection tool')
@@ -15,8 +16,20 @@ class FilePickerGUI:
     def select_file(self):
         filepath = filedialog.askopenfilename()
         print(f'Filepath selected: {filepath}')
-        kaun_paada = KaunPaada(filepath)
-        self.add_text(f'File selected: {filepath}')
+        self.kaun_paada = KaunPaada(filepath)
+        for item in self.kaun_paada.long_method_detector():
+            self.add_text(item)
+        self.add_text("--------------------------------------------\n")
+        for item in self.kaun_paada.long_parameter_list_detector():
+            self.add_text(item)
+        self.button = tk.Button(self.window, text='Save File', command=self.save_file)
+        self.button.pack()
+
+    def save_file(self):
+        filepath = filedialog.asksaveasfilename(defaultextension=".py",
+                                                filetypes=[("Python File", "*.py"), ("All Files", "*.*")])
+        if filepath:
+            self.kaun_paada.refactor_file(filepath)
 
     def add_text(self, text):
         # Create a new Label with the provided text
