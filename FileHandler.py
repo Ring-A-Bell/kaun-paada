@@ -18,6 +18,13 @@ class FileHandler:
             self.file_content = file.read()
             self.file_content_lines = self.file_content.splitlines()
 
+    def refactor_file(self, imports: list, globals: list, classes: list, functions: list) -> None:
+        # Add each line from the parameters into the refactored_file_content
+        self.refactored_file_content += '\n'.join(map(str, imports)) + '\n'
+        self.refactored_file_content += '\n'.join(map(str, globals)) + '\n'
+        self.refactored_file_content += '\n'.join(map(str, classes)) + '\n'
+        self.refactored_file_content += '\n'.join('\n'.join(map(str, function)) for function in functions) + '\n'
+
     def save_file(self, file_path: str) -> None:
         with open(file_path, 'w') as file:
             file.write(self.refactored_file_content)
