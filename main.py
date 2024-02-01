@@ -1,3 +1,4 @@
+import ast
 from UtilProvider import UtilProvider
 from FileHandler import FileHandler
 
@@ -21,12 +22,7 @@ class KaunPaada:
         self.long_parameter_list_functions: list = []
 
         self.function_detector()
-        # self.pretty_print(self.imports_list)
-        # self.pretty_print(self.global_consts_list)
-        # self.pretty_print(self.class_definitions_list)
-        self.duplicate_code_detector()
-        self.pretty_print(self.functions_list)
-        # self.refactor_file("refactored_file.py")
+        # self.semantic_code_detector()
 
     @staticmethod
     def pretty_print(list_name: list) -> None:
@@ -128,11 +124,47 @@ class KaunPaada:
                 if self.utils.jaccard_similarity(x, y) > JACCARD_SIMILARITY_THRESHOLD:
                     function_list_copy.append(self.functions_list[j])
         self.functions_list = [function for function in self.functions_list if function not in function_list_copy]
+        return True if function_list_copy else False
 
     def refactor_file(self, filepath: str) -> None:
         self.fh.refactor_file(self.imports_list, self.global_consts_list, self.class_definitions_list,
                               self.functions_list)
         self.fh.save_file(filepath)
+
+    def extract_operators(self, node):
+        if isinstance(node, ast.BinOp):
+            return [type(node.op)] + self.extract_operators(node.left) + self.extract_operators(node.right)
+        elif isinstance(node, ast.AST):
+            return [value for field, value in ast.iter_fields(node) if isinstance(value, ast.AST)]
+        elif isinstance(node, list):
+            return [item for sublist in node for item in self.extract_operators(sublist)]
+        return []
+
+    def parse_ast(self, code):
+        indent_level = self.utils.indent_count(code[0])
+        code = [line[indent_level:] for line in code]
+        return ast.parse("\n".join(code)).body[0]
+
+    @staticmethod
+    def get_ast_args_len(ast_body):
+        return len([arg.arg for arg in ast_body.args.args])
+
+    @staticmethod
+    def get_ast_return_type(ast_body):
+        return ast_body.returns
+
+    def compare_code(self, ast1, ast2):
+        if self.get_ast_args_len(ast1) == self.get_ast_args_len(ast2) and self.get_ast_return_type(ast1) == self.get_ast_return_type(ast2) and self.extract_operators(ast1.body[0].value) == self.extract_operators(ast2.body[0].value):
+            return True
+        return False
+
+    def semantic_code_detector(self):
+        semantically_equal_functions = []
+        for i in range(len(self.functions_list) - 1):
+            for j in range(i + 1, len(self.functions_list)):
+                if self.compare_code(self.parse_ast(self.functions_list[i]), self.parse_ast(self.functions_list[j])):
+                    semantically_equal_functions.append(f"Functions {i} and {j} are semantically equal")
+        return semantically_equal_functions
 
 
 if __name__ == "__main__":
