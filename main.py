@@ -115,6 +115,7 @@ class KaunPaada:
 
     def duplicate_code_detector(self):
         function_list_copy = list()
+        duplicate_functions_list = list()
         for i in range(len(self.functions_list)):
             x: set = set()
             for j in range(i + 1, len(self.functions_list)):
@@ -123,8 +124,9 @@ class KaunPaada:
                 y.update(word for line in self.functions_list[j] for word in line.split())
                 if self.utils.jaccard_similarity(x, y) > JACCARD_SIMILARITY_THRESHOLD:
                     function_list_copy.append(self.functions_list[j])
+                    duplicate_functions_list.append(f"Functions {i} and {j} have similar code")
         self.functions_list = [function for function in self.functions_list if function not in function_list_copy]
-        return True if function_list_copy else False
+        return duplicate_functions_list
 
     def refactor_file(self, filepath: str) -> None:
         self.fh.refactor_file(self.imports_list, self.global_consts_list, self.class_definitions_list,
@@ -160,10 +162,13 @@ class KaunPaada:
 
     def semantic_code_detector(self):
         semantically_equal_functions = []
+        function_list_copy = list()
         for i in range(len(self.functions_list) - 1):
             for j in range(i + 1, len(self.functions_list)):
                 if self.compare_code(self.parse_ast(self.functions_list[i]), self.parse_ast(self.functions_list[j])):
                     semantically_equal_functions.append(f"Functions {i} and {j} are semantically equal")
+                    function_list_copy.append(self.functions_list[j])
+        self.functions_list = [function for function in self.functions_list if function not in function_list_copy]
         return semantically_equal_functions
 
 
