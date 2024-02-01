@@ -154,7 +154,7 @@ class KaunPaada:
         return ast_body.returns
 
     def compare_code(self, ast1, ast2):
-        if self.get_ast_args_len(ast1) == self.get_ast_args_len(ast2) and self.get_ast_return_type(ast1) == self.get_ast_return_type(ast2) and self.extract_operators(ast1.body[0].value) == self.extract_operators(ast2.body[0].value):
+        if self.get_ast_args_len(ast1) == self.get_ast_args_len(ast2) and self.get_ast_return_type(ast1) == self.get_ast_return_type(ast2) and self.extract_operators(getattr(ast1.body[0], 'value', None)) == self.extract_operators(getattr(ast2.body[0], 'value', None)):
             return True
         return False
 
