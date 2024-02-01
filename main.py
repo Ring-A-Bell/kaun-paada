@@ -7,9 +7,9 @@ JACCARD_SIMILARITY_THRESHOLD: float = 0.75
 LINE_BREAK_PRINT: str = "#" + "-"*50 + "#"
 
 class KaunPaada:
-    def __init__(self):
+    def __init__(self, file_path: str):
         self.utils = UtilProvider()
-        self.fh = FileHandler("temp.py")
+        self.fh = FileHandler(file_path)
         self.original_code_lines = self.fh.get_file_content_lines()
         self.functions_list: list = []
         self.imports_list: list = []
@@ -24,6 +24,7 @@ class KaunPaada:
         self.pretty_print(self.functions_list)
 
     def pretty_print(self, list_name: list) -> None:
+        list_name = self.functions_list
         if not list_name:
             return
         if isinstance(list_name[0], list):
@@ -109,4 +110,4 @@ class KaunPaada:
 
 
 if __name__ == "__main__":
-    kaun_paada = KaunPaada()
+    kaun_paada = KaunPaada("main.py")
