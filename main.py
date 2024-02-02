@@ -18,11 +18,11 @@ class KaunPaada:
         self.imports_list: list = []
         self.global_consts_list: list = []
         self.class_definitions_list: list = []
-        self.long_methods_list: list = []
-        self.long_parameter_list_functions: list = []
+        self.long_methods_dict: dict = {}
+        self.long_parameter_list_dict: dict = {}
+        self.duplicate_functions_list: list = []
 
         self.function_detector()
-        # self.semantic_code_detector()
 
     @staticmethod
     def pretty_print(list_name: list) -> None:
@@ -39,7 +39,6 @@ class KaunPaada:
             print(LINE_BREAK_PRINT)
 
     def import_detector(self) -> None:
-        # Detect imports
         for line in self.original_code_lines:
             if self.utils.is_import_line(line.strip()):
                 self.imports_list.append(line.strip())
@@ -55,9 +54,7 @@ class KaunPaada:
                 self.global_consts_list.append(line)
 
     # Might have to refactor this, since it's >15 lines currently
-    def function_detector(self) -> None:
-        new_function_flag: bool = False
-        current_function: list = []
+    def pre_function_detector(self) -> None:
         for line in self.original_code_lines:
             # Should extract these conditions into a separate function
             if self.utils.is_import_line(line):
@@ -66,6 +63,15 @@ class KaunPaada:
                 self.global_consts_list.append(line)
             elif self.utils.is_class_definition_line(line):
                 self.class_definitions_list.append(line)
+            elif self.utils.is_empty_string(line):
+                continue
+            break
+
+    def function_detector(self) -> None:
+        new_function_flag: bool = False
+        current_function: list = []
+        self.pre_function_detector()
+        for line in self.original_code_lines:
             if self.utils.is_empty_string(line):
                 continue
             elif self.utils.is_function_definition_line(line) or self.utils.is_module_or_script_line(line):
@@ -80,40 +86,24 @@ class KaunPaada:
         if current_function not in self.functions_list:
             self.functions_list.append(current_function)
 
-    def long_method_detector(self) -> list:
+    def long_method_detector(self) -> dict:
         # Detect long methods
-        for function in self.functions_list:
-            function = self.utils.remove_empty_strings_from_list(function)
-            if len(function) > LONG_METHOD_THRESHOLD:
-                self.long_methods_list.append(function[0])
-        return self.long_methods_list
+        for _function in self.functions_list:
+            _function = self.utils.remove_empty_strings_from_list(_function)
+            if len(_function) > LONG_METHOD_THRESHOLD:
+                self.long_methods_dict.update({_function[0]: len(_function)})
+        return self.long_methods_dict
 
-    # def long_method_detector(self, function_code_blob: str) -> bool:
-    #     # Detect long methods
-    #     split_lines = self.utils.remove_empty_strings_from_list(function_code_blob.strip().splitlines())
-    #     #print(f"Split lines: {split_lines}")
-    #     num_of_lines: int = len(split_lines)
-    #     print(f"Number of lines in the code blob: {num_of_lines}")
-    #     return num_of_lines > LONG_METHOD_THRESHOLD
-
-    def long_parameter_list_detector(self) -> list:
+    def long_parameter_list_detector(self) -> dict:
         # Detect long parameter lists
         for function in self.functions_list:
             function_definition_arguments: str = function[0].split("(")[1].split(")")[0]
             parameter_list: list = self.utils.parameter_list_cleanup(function_definition_arguments.split(","))
             if len(parameter_list) > LONG_PARAMETER_LIST_THRESHOLD:
-                self.long_parameter_list_functions.append(function[0])
-        return self.long_parameter_list_functions
+                self.long_parameter_list_dict.update({function[0]: len(parameter_list)})
+        return self.long_parameter_list_dict
 
-    # def long_parameter_list_detector(self, function_definition: str) -> bool:
-    #     # Detect long parameter lists
-    #     function_definition_arguments: str = function_definition.split("(")[1].split(")")[0]
-    #     parameter_list: list = self.utils.parameter_list_cleanup(function_definition_arguments.split(","))
-    #     print(f"Parameter list: {parameter_list}")
-    #     print(f"Number of parameters: {len(parameter_list)}")
-    #     return len(parameter_list) > LONG_PARAMETER_LIST_THRESHOLD
-
-    def duplicate_code_detector(self):
+    def duplicate_code_detector(self) -> list:
         function_list_copy = list()
         duplicate_functions_list = list()
         for i in range(len(self.functions_list)):
@@ -133,7 +123,7 @@ class KaunPaada:
                               self.functions_list)
         self.fh.save_file(filepath)
 
-    def extract_operators(self, node):
+    def extract_operators(self, node) -> list:
         if isinstance(node, ast.BinOp):
             return [type(node.op)] + self.extract_operators(node.left) + self.extract_operators(node.right)
         elif isinstance(node, ast.AST):
@@ -142,25 +132,37 @@ class KaunPaada:
             return [item for sublist in node for item in self.extract_operators(sublist)]
         return []
 
-    def parse_ast(self, code):
+    def parse_ast(self, code: list) -> ast.stmt:
         indent_level = self.utils.indent_count(code[0])
         code = [line[indent_level:] for line in code]
         return ast.parse("\n".join(code)).body[0]
 
     @staticmethod
-    def get_ast_args_len(ast_body):
+    def get_ast_args_types(ast_body: any) -> list:
+        return [arg.annotation for arg in ast_body.args.args]
+
+    @staticmethod
+    def get_ast_args_len(ast_body: any) -> int:
         return len([arg.arg for arg in ast_body.args.args])
 
     @staticmethod
-    def get_ast_return_type(ast_body):
+    def get_ast_return_type(ast_body: any) -> str:
         return ast_body.returns
 
-    def compare_code(self, ast1, ast2):
-        if self.get_ast_args_len(ast1) == self.get_ast_args_len(ast2) and self.get_ast_return_type(ast1) == self.get_ast_return_type(ast2) and self.extract_operators(getattr(ast1.body[0], 'value', None)) == self.extract_operators(getattr(ast2.body[0], 'value', None)):
-            return True
-        return False
+    def compare_code(self, ast1: any, ast2: any) -> bool:
+        if self.get_ast_args_len(ast1) != self.get_ast_args_len(ast2):
+            return False
+        if self.get_ast_args_types(ast1) != self.get_ast_args_types(ast2):
+            return False
+        if self.get_ast_return_type(ast1) != self.get_ast_return_type(ast2):
+            return False
+        if self.extract_operators(getattr(ast1.body[0], 'value', None)) != self.extract_operators(
+                getattr(ast2.body[0], 'value', None)):
+            return False
+        return True
 
-    def semantic_code_detector(self):
+    def semantic_code_detector(self) -> list:
+        # Detect semantic equality based on parameters, return type and operators
         semantically_equal_functions = []
         function_list_copy = list()
         for i in range(len(self.functions_list) - 1):

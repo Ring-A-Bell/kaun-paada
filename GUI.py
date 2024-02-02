@@ -1,10 +1,8 @@
+import pygame
 import random
 import tkinter as tk
-from tkinter import filedialog
-
-import pygame
-
 from main import KaunPaada
+from tkinter import filedialog
 
 GUI_TITLE = "Kaun Paada GUI"
 GUI_DESCRIPTION = "Welcome to Kaun Paada aka Who Farted?\nThis is a code smell detection tool for Python\n\n"
@@ -30,7 +28,7 @@ class FilePickerGUI:
         self.add_text("Select a Python file to begin", font=BODY_FONT)
         self.add_button('Select File', self.select_file)
 
-    def make_window_scrollable(self):
+    def make_window_scrollable(self) -> None:
         self.main_frame.pack(fill=tk.BOTH, expand=1)
         self.my_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
         self.my_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
@@ -41,27 +39,26 @@ class FilePickerGUI:
 
         self.my_canvas.create_window((0, 0), window=self.second_frame, anchor="nw")
 
-    def select_file(self):
+    def select_file(self) -> None:
         filepath = filedialog.askopenfilename(filetypes=SUPPORTED_FILE_TYPES)
         print(f'Filepath selected: {filepath}')
         self.handle_callback(filepath)
 
-    def handle_callback(self, filepath: str):
+    def handle_callback(self, filepath: str) -> None:
         self.kaun_paada = KaunPaada(filepath)
-        # self.display_list_results(self.kaun_paada.long_method_detector(), "Long Methods Detected")
-        self.display_dict_results(self.kaun_paada.long_method_detector(), "Long Classes Detected")
-        # self.display_list_results(self.kaun_paada.long_parameter_list_detector(), "Long Parameter Lists Detected")
-        self.display_dict_results(self.kaun_paada.long_parameter_list_detector(), "Long Functions Detected")
+        self.display_dict_results(self.kaun_paada.long_method_detector(), "Long Methods Detected")
+        self.display_dict_results(self.kaun_paada.long_parameter_list_detector(), "Long Parameter Lists Detected")
         duplicate_functions_list = self.kaun_paada.duplicate_code_detector()
         semantically_equal_functions_list = self.kaun_paada.semantic_code_detector()
-        self.handle_duplicate_code(duplicate_functions_list, semantically_equal_functions_list)
+        self.handle_duplicate_code_callback(duplicate_functions_list, semantically_equal_functions_list)
 
-    def handle_duplicate_code(self, duplicate_functions_list: list, semantically_equal_functions_list: list):
+    def handle_duplicate_code_callback(self, duplicate_functions_list: list,
+                                       semantically_equal_functions_list: list) -> None:
         if duplicate_functions_list or semantically_equal_functions_list:
             self.display_list_results(duplicate_functions_list, "Duplicate Functions based on Jaccard Similarity")
             self.display_list_results(semantically_equal_functions_list, "Semantically Equal Functions Detected")
             self.add_text("\nDuplicate Code has been detected. Do you want to refactor?", font=SUBHEADING_FONT)
-            self.add_button('Save Refactored File', self.save_file)
+            self.add_button('Save Refactored File', command=self.save_file)
         else:
             self.add_text("No duplicate code found!", font=SUBHEADING_FONT)
             self.add_text("No smells detected, so great job :)", font=HEADING_FONT)
@@ -87,26 +84,26 @@ class FilePickerGUI:
         self.add_text("\n--------------------------------------------\n")
 
     @staticmethod
-    def play_random_audio():
+    def play_random_audio() -> None:
         audio_file = random.choice(AUDIO_FILES)
         pygame.mixer.init()
         pygame.mixer.music.load(audio_file)
         pygame.mixer.music.play()
 
-    def save_file(self):
+    def save_file(self) -> None:
         filepath = filedialog.asksaveasfilename(defaultextension=".py", filetypes=SUPPORTED_FILE_TYPES)
         if filepath:
             self.kaun_paada.refactor_file(filepath)
 
-    def add_text(self, text, font=BODY_FONT):
+    def add_text(self, text: str, font: tuple = BODY_FONT) -> None:
         new_label = tk.Label(self.second_frame, text=text, font=font)
         new_label.pack()
 
-    def add_button(self, text, command, font=BODY_FONT):
+    def add_button(self, text: str, command: any, font: tuple = BODY_FONT) -> None:
         new_button = tk.Button(self.second_frame, text=text, command=command, font=font)
         new_button.pack()
 
-    def run(self):
+    def run(self) -> None:
         self.window.mainloop()
 
 
