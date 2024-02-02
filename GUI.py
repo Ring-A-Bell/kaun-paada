@@ -48,15 +48,14 @@ class FilePickerGUI:
         self.kaun_paada = KaunPaada(filepath)
         self.display_dict_results(self.kaun_paada.long_method_detector(), "Long Methods Detected")
         self.display_dict_results(self.kaun_paada.long_parameter_list_detector(), "Long Parameter Lists Detected")
-        duplicate_functions_list = self.kaun_paada.duplicate_code_detector()
-        semantically_equal_functions_list = self.kaun_paada.semantic_code_detector()
-        self.handle_duplicate_code_callback(duplicate_functions_list, semantically_equal_functions_list)
 
-    def handle_duplicate_code_callback(self, duplicate_functions_list: list,
-                                       semantically_equal_functions_list: list) -> None:
-        if duplicate_functions_list or semantically_equal_functions_list:
+        # For enabling semantic code check, pass semantic_code_detector() as a param below
+        self.handle_duplicate_code_callback(self.kaun_paada.duplicate_code_detector())
+
+    # For enabling semantic code check, add a list param, extend if check, and pass to display function
+    def handle_duplicate_code_callback(self, duplicate_functions_list: list) -> None:
+        if duplicate_functions_list:
             self.display_list_results(duplicate_functions_list, "Duplicate Functions based on Jaccard Similarity")
-            self.display_list_results(semantically_equal_functions_list, "Semantically Equal Functions Detected")
             self.add_text("\nDuplicate Code has been detected. Do you want to refactor?", font=SUBHEADING_FONT)
             self.add_button('Save Refactored File', command=self.save_file)
         else:
