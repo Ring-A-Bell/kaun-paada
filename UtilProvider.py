@@ -75,6 +75,11 @@ class UtilProvider:
         return False
 
     @staticmethod
+    def is_annotation_line(line: str) -> bool:
+        # Check if a line is an annotation line
+        return line.startswith("@")
+
+    @staticmethod
     def indent_count(line: str) -> int:
         # Count the number of leading spaces in a line
         return len(line) - len(line.lstrip())
