@@ -83,3 +83,15 @@ class UtilProvider:
     def indent_count(line: str) -> int:
         # Count the number of leading spaces in a line
         return len(line) - len(line.lstrip())
+
+    @staticmethod
+    def get_ast_args_types(ast_body: any) -> list:
+        return [arg.annotation for arg in ast_body.args.args]
+
+    @staticmethod
+    def get_ast_args_len(ast_body: any) -> int:
+        return len([arg.arg for arg in ast_body.args.args])
+
+    @staticmethod
+    def get_ast_return_type(ast_body: any) -> str:
+        return ast_body.returns

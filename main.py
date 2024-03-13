@@ -97,8 +97,9 @@ class KaunPaada:
     def long_parameter_list_detector(self) -> dict:
         # Detect long parameter lists
         for function in self.functions_list:
-            if self.get_ast_args_len(self.parse_ast(function)) > LONG_PARAMETER_LIST_THRESHOLD:
-                self.long_parameter_list_dict.update({function[0]: self.get_ast_args_len(self.parse_ast(function))})
+            param_nums = self.utils.get_ast_args_len(self.parse_ast(function))
+            if param_nums > LONG_PARAMETER_LIST_THRESHOLD:
+                self.long_parameter_list_dict.update({function[0]: param_nums})
         return self.long_parameter_list_dict
 
     def duplicate_code_detector(self) -> list:
@@ -135,24 +136,12 @@ class KaunPaada:
         code = [line[indent_level:] for line in code]
         return ast.parse("\n".join(code)).body[0]
 
-    @staticmethod
-    def get_ast_args_types(ast_body: any) -> list:
-        return [arg.annotation for arg in ast_body.args.args]
-
-    @staticmethod
-    def get_ast_args_len(ast_body: any) -> int:
-        return len([arg.arg for arg in ast_body.args.args])
-
-    @staticmethod
-    def get_ast_return_type(ast_body: any) -> str:
-        return ast_body.returns
-
     def compare_code(self, ast1: any, ast2: any) -> bool:
-        if self.get_ast_args_len(ast1) != self.get_ast_args_len(ast2):
+        if self.utils.get_ast_args_len(ast1) != self.utils.get_ast_args_len(ast2):
             return False
-        if self.get_ast_args_types(ast1) != self.get_ast_args_types(ast2):
+        if self.utils.get_ast_args_types(ast1) != self.utils.get_ast_args_types(ast2):
             return False
-        if self.get_ast_return_type(ast1) != self.get_ast_return_type(ast2):
+        if self.utils.get_ast_return_type(ast1) != self.utils.get_ast_return_type(ast2):
             return False
         if self.extract_operators(getattr(ast1.body[0], 'value', None)) != self.extract_operators(
                 getattr(ast2.body[0], 'value', None)):
