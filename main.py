@@ -97,10 +97,8 @@ class KaunPaada:
     def long_parameter_list_detector(self) -> dict:
         # Detect long parameter lists
         for function in self.functions_list:
-            function_definition_arguments: str = function[0].split("(")[1].split(")")[0]
-            parameter_list: list = self.utils.parameter_list_cleanup(function_definition_arguments.split(","))
-            if len(parameter_list) > LONG_PARAMETER_LIST_THRESHOLD:
-                self.long_parameter_list_dict.update({function[0]: len(parameter_list)})
+            if self.get_ast_args_len(self.parse_ast(function)) > LONG_PARAMETER_LIST_THRESHOLD:
+                self.long_parameter_list_dict.update({function[0]: self.get_ast_args_len(self.parse_ast(function))})
         return self.long_parameter_list_dict
 
     def duplicate_code_detector(self) -> list:
